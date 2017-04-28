@@ -1,0 +1,56 @@
+android.app.ActivityThread
+android.app.LoadedApk
+android.app.ActivityManagerNative
+android.app.IActivityManager
+android.content.res.CompatibilityInfo
+android.content.pm.PackageParser
+android.content.pm.PackageParser$Package
+android.content.pm.PackageUserState
+android.content.pm.PackageManager
+android.content.pm.IPackageManager
+android.content.pm.ApplicationInfo
+dalvik.system.DexClassLoader
+
+
+
+
+
+
+生成LoadApk并放入mPackages
+  获取ActivityThread中的mPackages
+    反射ActivityThread的static方法currentActivityThread方法获取ActivityThread
+    反射获取mPackages字段
+  生成LoadApk
+    生成CompatibilityInfo
+      反射获取android.content.res.CompatibilityInfo的static变量DEFAULT_COMPATIBILITY_INFO
+    生成ApplicationInfo
+      反射获取PackageParser的generateApplicationInfo方法
+        反射获取PackageParser的Class
+        反射获取PackageParser$Package的Class
+        反射获取PackageUserState的Class
+      PackageParser的Class的newInstance()生成PackageParser对象
+      PackageUserState的Class的newInstance()生成PackageUserState对象
+      反射获取PackageParser的parsePackage方法
+      调用parsePackage方法生成Package对象
+      调用generateApplicationInfo方法生成ApplicationInfo对象
+      ApplicationInfo对象的sourceDir和publicSourceDir修改位ApkFile的Path
+      反射获取ActivityThread的getPackageInfoNoCheck方法
+      调用getPackageInfoNoCheck方法生成LoadApk对象
+  生成Customlassoader对象
+  反射将Customlassoader对象放入LoadApk对象的mClassLoader字段
+  存一份Customlassoader对象的强引用
+  生成LoadApk对象的弱引用放入mPackages中
+hookActivityManagerNative
+  反射获取android.app.ActivityManagerNative的Class
+  反射获取static的gDefault字段
+  反射获取gDefault的IActivityManager类型的mInstance字段
+  代理IActivityManager类型的android.app.ActivityManagerNative.gefault.mInstance
+
+
+代理IActivityManager的startService方法和stopService方法
+startService:将Intent的ComponentName换成合法的，原始ComponentName存到extra
+stopServiuce:手动stop，不由系统处理
+
+
+代理android.content.pm.IPackageManager的getackageInfo方法
+返回一个new PackageInfo()
